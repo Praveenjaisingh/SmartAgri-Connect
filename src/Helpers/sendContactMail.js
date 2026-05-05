@@ -4,7 +4,6 @@ const path = require("path");
 
 const sendContactMail = async ({ to, subject, replacements }) => {
     const filePath = path.join(__dirname, "../Templates/contactEmail.html");
-    // const filePath = path.join(process.cwd(), "Templates/contactEmail.html");
     let html = fs.readFileSync(filePath, "utf-8");
 
     Object.keys(replacements).forEach((key) => {
