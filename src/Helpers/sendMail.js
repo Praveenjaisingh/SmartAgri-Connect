@@ -3,8 +3,8 @@ const fs = require("fs");
 const path = require("path");
 
 const sendMail = async ({ to, subject, replacements }) => {
-    // const filePath = path.join(__dirname, "../templates/welcomeEmail.html");
-    const filePath = path.join(process.cwd(), "templates/welcomeEmail.html");
+    const filePath = path.join(__dirname, "../templates/welcomeEmail.html");
+    // const filePath = path.join(process.cwd(), "templates/welcomeEmail.html");
     let html = fs.readFileSync(filePath, "utf-8");
     Object.keys(replacements).forEach(key => {
         html = html.replace(new RegExp(`{{${key}}}`, "g"), replacements[key]);
