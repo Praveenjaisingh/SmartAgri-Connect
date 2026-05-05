@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us - Smart Agri-Connect</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <header>
+    <h1>Smart Agri-Connect</h1>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="marketplace.html">Marketplace</a>
+      <a href="features.html">Features</a>
+      <a href="about.html">About</a>
+      <a href="faq.html">FAQs</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="contact-form">
+      <h2>🌾 We'd love to hear from you!</h2>
+      <p>Whether you have a question, feedback, or just want to say hi — send us a message below! To sell your healthful
+        products</p>
+
+      <form id="contactForm">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="DEAD POOL..." required />
+
+        <label for="email">Your Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required />
+
+        <label for="product">Your Product (optional)</label>
+        <input type="text" id="product" name="product" placeholder="Apple" />
+
+        <label for="cost">Your Cost (optional)</label>
+        <input type="number" id="cost" name="cost" placeholder="100" />
+
+        <label for="quantity">Your Quantity (optional)</label>
+        <input type="number" id="quantity" name="quantity" placeholder="7 KG" />
+
+        <label for="message">Your Message</label>
+        <textarea id="message" name="message" rows="5" placeholder="Write your message here..." required></textarea>
+
+
+        <label for="image">Attach an Image (optional)</label>
+        <input type="file" id="image" name="image" accept="image/*" placeholder="Send a image" />
+
+
+        <button type="submit" class="btn">Send message</button>
+      </form>
+    </section>
+  </main>
+  <div id="toast-container"></div>
+  <div id="loader" class="loader-overlay" style="display:none;">
+    <div class="spinner"></div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Smart Agri-Connect. All rights reserved.</p>
+  </footer>
+  <script>
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+      history.go(1);
+    };
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3500);
+    }
+    function showLoader() {
+      document.getElementById("loader").style.display = "flex";
+    }
+
+    function hideLoader() {
+      document.getElementById("loader").style.display = "none";
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('contactForm');
+
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const product = document.getElementById('product').value.trim();
+        const cost = document.getElementById('cost').value.trim();
+        const quantity = document.getElementById('quantity').value.trim();
+        const message = document.getElementById('message').value.trim();
+        const image = document.getElementById('image').files[0];
+
+        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+        if (name === '') return showToast('Enter name');
+        if (!email.match(emailPattern)) return showToast('Invalid email');
+
+        try {
+          showLoader();
+          const formData = new FormData();
+          formData.append('name', name);
+          formData.append('email', email);
+          formData.append('product', product);
+          formData.append('cost', cost);
+          formData.append('quantity', quantity);
+          formData.append('message', message);
+
+          if (image) {
+            formData.append('image', image);
+          }
+          const token = localStorage.getItem("token");
+          const response = await fetch('/api/users/contact', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+
+          const data = await response.json();
+          hideLoader();
+
+          if (!response.ok) {
+            throw new Error(data.message || 'Something went wrong');
+          }
+
+          showToast('Message sent successfully!');
+          window.location.href = 'Thankyou.html';
+
+        } catch (error) {
+          hideLoader();
+          showToast(error.message);
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

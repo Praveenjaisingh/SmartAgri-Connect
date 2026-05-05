@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment - Smart Agri-Connect</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .upi-qr-code {
+      display: none;
+      margin: 20px auto;
+      width: 200px;
+      height: 200px;
+      background-color: #fff;
+      padding: 20px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .upi-qr-code img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .btn-upi {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .btn-upi:hover {
+      background-color: #45a049;
+    }
+
+    .back {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-left: 83%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Smart Agri-Connect</h1>
+    <nav>
+      <a href="payment.html">Marketplace</a>
+
+  </header>
+
+  <main>
+    <section class="payment-section">
+      <h2>💳 Complete Your Payment</h2>
+
+
+      <a href="javascript:void(0)" class="btn-upi" onclick="showQR()">Pay via UPI Scanner</a>
+
+
+      <div id="upiQR" class="upi-qr-code">
+        <img src="image/QR.jpeg" alt="UPI QR Code" />
+      </div>
+
+
+      <p>Or, you can use the link below to pay via UPI directly:</p>
+      <a href="https://pay.google.com/intl/en_in/about/" class="btn-upi">
+        Pay ₹Rupees via UPI
+      </a>
+      <a href="payment.html" class="back">Back</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Smart Agri-Connect. All rights reserved.</p>
+  </footer>
+
+  <script>
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+      history.go(1);
+    };
+    function showQR() {
+      const qrCode = document.getElementById("upiQR");
+      qrCode.style.display = (qrCode.style.display === "block") ? "none" : "block";
+      setTimeout(function () {
+        const paid = confirm("Have you completed the UPI payment?");
+        if (paid) {
+          alert("✅ Thank you! Your payment is noted.");
+          window.location.href = 'paymentthankyou.html';
+        } else {
+          alert("⚠️ Payment not confirmed. Please try again.");
+        }
+      }, 7000);
+    }
+  </script>
+
+</body>
+
+</html>

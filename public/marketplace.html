@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketplace - Smart Agri-Connect</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: green;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    nav a {
+      margin: 0 10px;
+      color: white;
+      text-decoration: none;
+    }
+
+    .marketplace {
+      padding: 20px;
+    }
+
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .product-list li {
+      list-style: none;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .product-list li:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .qty-input {
+      width: 60px;
+      padding: 5px;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .btn {
+      background: green;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .btn:hover {
+      background: darkgreen;
+    }
+
+    .toast {
+      visibility: hidden;
+      min-width: 200px;
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 12px;
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      border-radius: 5px;
+    }
+
+    .toast.show {
+      visibility: visible;
+    }
+
+    /* SEARCH BAR */
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .search-bar button {
+      padding: 10px 15px;
+      background: green;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* LOADING */
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Smart Agri-Connect</h1>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="marketplace.html">Marketplace</a>
+      <a href="cart.html">Cart</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="marketplace">
+      <h2>🛒 Marketplace</h2>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search products (Rice, Nuts...)" />
+        <button onclick="fetchProducts()">Search</button>
+      </div>
+
+      <ul class="product-list" id="product-list">
+        <p>Loading products...</p>
+      </ul>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+      history.go(1);
+    };
+
+    async function verifyUser() {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/users/verify-token', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        const data = await res.json();
+
+        console.log("Verify Response:", data);
+        if (!data.status) {
+          localStorage.removeItem("token");
+          window.location.href = "index.html";
+        }
+
+      } catch (err) {
+        console.error("Verification error:", err);
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+      }
+    }
+    verifyUser();
+    const API_INDEX = "/api/users/index";
+    const API_CART = "/api/users/cart";
+
+    async function fetchProducts() {
+      const token = localStorage.getItem("token");
+
+      const search = document.getElementById("searchInput")?.value || "";
+
+      document.getElementById("product-list").innerHTML =
+        "<p class='loading'>Loading products...</p>";
+
+      try {
+        const response = await fetch(API_INDEX, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            search: search
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status && result.data.length > 0) {
+          renderProducts(result.data);
+        } else {
+          document.getElementById("product-list").innerHTML =
+            "<p>No products found</p>";
+        }
+
+      } catch (error) {
+        console.error(error);
+        document.getElementById("product-list").innerHTML =
+          "<p>Error loading products</p>";
+      }
+    }
+    function renderProducts(products) {
+      const productList = document.getElementById("product-list");
+      productList.innerHTML = "";
+
+      products.forEach(product => {
+
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+      <img src="${product.image_path}" class="product-img"/>
+
+      <h3>${product.product}</h3>
+
+      <p>₹${product.cost} / kg</p>
+
+      <input type="number" min="1" value="1" 
+        id="qty-${product.id}" class="qty-input"/>
+
+      <button class="btn"
+        onclick="addToCart(${product.id}, '${product.product}', ${product.cost})">
+        Add to Cart
+      </button>
+    `;
+
+        productList.appendChild(li);
+      });
+    }
+
+    async function addToCart(id, productName, cost) {
+      const qty = document.getElementById(`qty-${id}`).value;
+
+      if (!qty || qty <= 0) {
+        alert("Enter valid quantity");
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      const total = cost * qty;
+      try {
+        const response = await fetch(API_CART, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            product: productName,
+            cost: cost,
+            Quantity: parseInt(qty),
+            total: total
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status) {
+          showToast(`${productName} added (₹${total}) ✅`);
+        } else {
+          alert("Failed to add");
+        }
+
+      } catch (error) {
+        console.error(error);
+        alert("Error");
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg;
+      toast.className = "toast show";
+
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 3000);
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchProducts);
+  </script>
+
+</body>
+
+</html>
