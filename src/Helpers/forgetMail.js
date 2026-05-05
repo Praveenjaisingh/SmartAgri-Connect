@@ -5,7 +5,8 @@ const path = require("path");
 
 const forgetMail = async ({ to, subject, replacements, template }) => {
 
-    const filePath = path.join(__dirname, `../templates/resetpasswordemail.html`);
+    // const filePath = path.join(__dirname, `../templates/resetpasswordemail.html`);
+    const filePath = path.join(process.cwd(), "templates/resetpasswordemail.html");
 
     let html = fs.readFileSync(filePath, "utf-8");
 
