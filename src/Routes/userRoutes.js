@@ -36,5 +36,6 @@ router.post("/payment",verifyToken,createPaymentValidator,validate,userControlle
 router.post("/index",verifyToken,userController.index);
 router.post("/cart",verifyToken,userController.cart);
 router.post("/product-list",verifyToken,userController.productlist);
-router.post("/delete", verifyToken,deleteValidator,validate,userController.delete);
+router.post("/delete", verifyToken, deleteValidator, validate, userController.delete);
+router.post("/upi-payment", verifyToken, userController.createUPIPayment);
 module.exports = router;

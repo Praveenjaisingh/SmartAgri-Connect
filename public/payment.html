@@ -183,21 +183,36 @@
       }
     });
 
-    function payViaUPI() {
+    async function payViaUPI() {
       const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
       const amount = document.getElementById('amount').value.trim();
 
-      if (!name || !email || !amount || Number(amount) <= 0) {
-        alert('Please fill in all details and a valid amount.');
+      const token = localStorage.getItem("token");
+
+      const response = await fetch('/api/users/upi-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name,
+          amount
+        })
+      });
+
+      const data = await response.json();
+
+      if (!data.status) {
+        alert(data.message);
         return;
       }
 
-      const upiID = "dpp469926@okaxis";
-      const upiLink = `upi://pay?pa=${upiID}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
-
-
-      window.location.href = 'qr.html';
+      const upiUrl = data.data.upiUrl;
+      window.location.href = upiUrl;
+      setTimeout(() => {
+        window.location.href = "qr.html";
+      }, 2000);
     }
   </script>
 

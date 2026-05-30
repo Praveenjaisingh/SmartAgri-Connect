@@ -229,6 +229,24 @@ class userService {
 
         return deleted;
     }
+
+    async createUPIPayment(data) {
+
+        const { amount, name } = data;
+        if (!amount || Number(amount) <= 0) {
+            throw new AppError("Invalid amount");
+        }
+        const upiId = "dpp469926@okaxis";
+        const upiUrl =
+            `upi://pay?pa=${upiId}` +
+            `&pn=${encodeURIComponent(name || "Customer")}` +
+            `&am=${amount}` +
+            `&cu=INR`;
+        return {
+            amount,
+            upiUrl
+        };
+    }
 }
 
 module.exports = new userService();
