@@ -1,5 +1,5 @@
 const { User, Contact, Payment, Home, Cart } = require("../Models");
-const { Op,Sequelize } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 
 
 class userRepository {
@@ -129,6 +129,18 @@ class userRepository {
     async delete(id) {
         return await Cart.destroy({
             where: { id: id }
+        });
+    }
+
+    async findUserById(id) {
+        return await User.findByPk(id);
+    }
+
+    async getUserCart(userId) {
+        return await Cart.findAll({
+            where: {
+                userId: userId
+            }
         });
     }
 

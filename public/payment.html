@@ -26,32 +26,19 @@
   <main>
     <section class="payment-section">
       <h2>💳 Complete Your Payment</h2>
-      <form class="payment-form">
-        <label for="name">Full Name:</label>
-        <input type="text" id="name" name="name" required />
 
-        <label for="email">Email Address:</label>
-        <input type="email" id="email" name="email" required />
+      <p>Your cart total will be calculated automatically.</p>
 
-        <label for="amount">Amount (₹):</label>
-        <input type="number" id="amount" name="amount" min="1" required />
+      <button type="button" class="btn" onclick="payViaUPI()">
+        Pay via UPI
+      </button>
 
+      <br><br>
 
-        <label for="cardNumber">Card Number:</label>
-        <input type="text" id="cardNumber" name="cardNumber" maxlength="16" required />
+      <button type="button" class="btn" onclick="openQR()">
+        Show QR Code
+      </button>
 
-        <label for="expdate">Expiration Date:</label>
-        <input type="month" id="expdate" name="expdate" required />
-
-        <label for="CVV">CVV:</label>
-        <input type="text" id="CVV" name="CVV" maxlength="4" required />
-
-        <button type="submit" class="btn">Pay Now</button>
-        <h4 style="text-align: center;">OR</h4>
-        <label for="upi">Pay via UPI:</label>
-        <p>Click the button below to pay using any UPI app (PhonePe, GPay, etc).</p>
-        <button type="button" class="btn" onclick="payViaUPI()">Pay via UPI</button>
-      </form>
     </section>
   </main>
 
@@ -65,6 +52,7 @@
       history.go(1);
     };
 
+    // token check
     async function verifyUser() {
       const token = localStorage.getItem("token");
 
@@ -83,141 +71,62 @@
 
         const data = await res.json();
 
-        console.log("Verify Response:", data);
         if (!data.status) {
           localStorage.removeItem("token");
           window.location.href = "index.html";
         }
 
       } catch (err) {
-        console.error("Verification error:", err);
         localStorage.removeItem("token");
         window.location.href = "index.html";
       }
     }
+
     verifyUser();
 
-    function showToast(message, type) {
-      let toast = document.getElementById("toast");
 
-      if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "toast";
-        toast.style.marginTop = "10px";
-        toast.style.padding = "10px";
-        toast.style.borderRadius = "5px";
-        toast.style.color = "white";
-        toast.style.textAlign = "center";
-        document.querySelector(".login-form").appendChild(toast);
-      }
-
-      toast.style.display = "block";
-      toast.innerText = message;
-      toast.style.background = type === "success" ? "green" : "red";
-
-      setTimeout(() => {
-        toast.style.display = "none";
-      }, 3000);
-    }
-    const form = document.querySelector('.payment-form');
-    form.addEventListener('submit', async function (event) {
-      event.preventDefault();
-
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const amount = document.getElementById('amount').value.trim();
-      const cardNumber = document.getElementById('cardNumber').value.trim();
-      const expdate = document.getElementById('expdate').value.trim();
-      const CVV = document.getElementById('CVV').value.trim();
-
-      if (!name || !email || !cardNumber || !expdate || !CVV) {
-        showToast("All fields are required", "error");
-        return;
-      }
-
-      if (!amount || isNaN(amount) || Number(amount) <= 0) {
-        showToast('Please enter a valid amount.');
-        return;
-      }
-
-      if (cardNumber.length !== 16 || !/^\d+$/.test(cardNumber)) {
-        showToast('Card number must be exactly 16 digits.');
-        return;
-      }
-
-      if (CVV.length !== 3 || !/^\d+$/.test(CVV)) {
-        showToast('CVV must be exactly 3 digits.');
-        return;
-      }
+    // UPI Payment
+    async function payViaUPI() {
 
       const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch('/api/users/payment', {
+        const response = await fetch('/api/users/upi-payment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            amount,
-            cardNumber,
-            expdate,
-            CVV
-          })
+          }
         });
 
         const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.message || "Payment failed");
+        if (!data.status) {
+          alert(data.message);
+          return;
         }
 
-        window.location.href = 'paymentthankyou.html';
+        const upiUrl = data.data.upiUrl;
 
-      } catch (error) {
-        console.log("Error", err);
-        showToast(error.message);
+        // open UPI apps
+        window.location.href = upiUrl;
+
+        // fallback QR
+        setTimeout(() => {
+          window.location.href = "qr.html";
+        }, 2000);
+
+      } catch (err) {
+        alert("Payment error");
       }
-    });
-
-    async function payViaUPI() {
-      const name = document.getElementById('name').value.trim();
-      const amount = document.getElementById('amount').value.trim();
-
-      const token = localStorage.getItem("token");
-
-      const response = await fetch('/api/users/upi-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name,
-          amount
-        })
-      });
-
-      const data = await response.json();
-
-      if (!data.status) {
-        alert(data.message);
-        return;
-      }
-
-      const upiUrl = data.data.upiUrl;
-      window.location.href = upiUrl;
-      setTimeout(() => {
-        window.location.href = "qr.html";
-      }, 2000);
     }
+
+    // direct QR page
+    function openQR() {
+      window.location.href = "qr.html";
+    }
+
   </script>
-
-
-
 
 </body>
 

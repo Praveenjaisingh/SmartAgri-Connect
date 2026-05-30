@@ -127,11 +127,17 @@ exports.index = async (req, res, next) => {
 
 exports.cart = async (req, res, next) => {
     try {
-        const data = await userService.cart(req.body);
+
+        const userId = req.user.id;
+
+        const data = await userService.cart({
+            userId,
+            ...req.body
+        });
         return res.status(200).json({
             status: true,
             message: "products added to the cart successfully",
-            data: data
+            data
         });
 
     } catch (error) {
@@ -170,7 +176,8 @@ exports.delete = async (req, res, next) => {
 
 exports.createUPIPayment = async (req, res, next) => {
     try {
-        const data = await userService.createUPIPayment(req.body);
+        const userId = req.user.id;
+        const data = await userService.createUPIPayment(userId);
 
         return res.status(200).json({
             status: true,

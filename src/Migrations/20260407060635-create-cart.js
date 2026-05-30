@@ -12,6 +12,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
       product: {
         allowNull: true,
         type: Sequelize.STRING

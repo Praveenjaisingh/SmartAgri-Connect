@@ -83,7 +83,7 @@ class userService {
         if (!data) {
             throw new AppError("Contact data is required");
         }
-        const { name,email,product,cost,quantity,message,image_path} = data;
+        const { name, email, product, cost, quantity, message, image_path } = data;
 
         const saved = await userRepository.contact({
             name,
@@ -197,8 +197,11 @@ class userService {
     }
 
     async cart(data) {
-        const { product, cost, Quantity, total } = data;
+
+        const { product, cost, Quantity, total, userId } = data;
+
         const userList = await userRepository.cart({
+            userId,
             product,
             cost,
             Quantity,
@@ -208,6 +211,7 @@ class userService {
         if (!userList) {
             throw new AppError("No products to add");
         }
+
         return userList;
     }
 
@@ -230,20 +234,36 @@ class userService {
         return deleted;
     }
 
-    async createUPIPayment(data) {
+    async createUPIPayment(userId) {
 
-        const { amount, name } = data;
-        if (!amount || Number(amount) <= 0) {
-            throw new AppError("Invalid amount");
+        const user = await userRepository.findUserById(userId);
+
+        if (!user) {
+            throw new AppError("User not found");
         }
+
+        const cartItems = await userRepository.getUserCart(userId);
+
+        if (!cartItems.length) {
+            throw new AppError("Cart is empty");
+        }
+
+        const totalAmount = cartItems.reduce(
+            (sum, item) => sum + Number(item.total),
+            0
+        );
+
         const upiId = "dpp469926@okaxis";
+
         const upiUrl =
             `upi://pay?pa=${upiId}` +
-            `&pn=${encodeURIComponent(name || "Customer")}` +
-            `&am=${amount}` +
+            `&pn=${encodeURIComponent(user.name)}` +
+            `&am=${totalAmount}` +
             `&cu=INR`;
+
         return {
-            amount,
+            customerName: user.name,
+            amount: totalAmount,
             upiUrl
         };
     }
