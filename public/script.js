@@ -35,7 +35,7 @@ async function verifyUser() {
 }
 verifyUser();
 
- async function logoutUser() {
+async function logoutUser() {
   const token = localStorage.getItem("token");
 
   try {
