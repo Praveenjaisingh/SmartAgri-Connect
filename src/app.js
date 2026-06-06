@@ -4,8 +4,10 @@ const path = require("path");
 
 const userRoutes = require('./Routes/userRoutes');
 const errorHandler = require("./Middleware/errorHandler");
+const cspMiddleware = require("./Middleware/cspMiddleware");
 
 const app = express();
+app.use(cspMiddleware);
 
 app.use(cors());
 app.use(express.json());
