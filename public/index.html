@@ -29,10 +29,10 @@
             </div>
 
             <div class="input-group" style="position: relative;">
-               <label for="password">Password</label>
-                 <input type="password" id="password" name="password" placeholder="Enter your password" required />
-                   <span onclick="togglePassword('password', this)"
-                     style="position:absolute; right:10px; top:38px; cursor:pointer;">👁️
+                <label for="password">Password</label>
+                  <input type="password" id="password" name="password" placeholder="Enter your password" required />
+                    <span onclick="togglePassword('password', this)"
+                      style="position:absolute; right:10px; top:38px; cursor:pointer;">👁️
                     </span>
             </div>
             <button type="submit" class="btn">Login</button>
@@ -52,7 +52,7 @@
   <footer>
     <p>&copy; 2025 Smart Agri-Connect. All rights reserved.</p>
   </footer>
- <script>
+<script>
 
   function showToast(message, type) {
     let toast = document.getElementById("toast");
@@ -141,7 +141,7 @@
           localStorage.setItem("token", data.token);
 
           setTimeout(() => {
-            window.location.href = "home.html";
+            window.location.replace("/home.html");
           }, 1500);
 
         } else {
