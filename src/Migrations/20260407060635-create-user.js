@@ -1,6 +1,6 @@
 'use strict';
 
-const { sequelize } = require('../models');
+const { sequelize } = require('../Models');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -33,11 +33,11 @@ module.exports = {
         type: Sequelize.DATE
       },
       resetToken: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: true
       },
       resetTokenExpiry: {
-        type: DataTypes.BIGINT,
+        type: Sequelize.BIGINT,
         allowNull: true
       }
     });

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order History - Smart Agri-Connect</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    nav a { margin:0 10px; color:#2d6a2d; text-decoration:none; font-weight:600; }
+    nav { background:#f0f7f0; padding:12px 24px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .nav-brand { font-weight:700; color:#2d6a2d; flex:1; font-size:1.1rem; }
+    .page-header { text-align:center; padding:30px 0 10px; }
+    .orders-list { max-width:900px; margin:20px auto; padding:0 20px; display:flex; flex-direction:column; gap:16px; }
+    .order-card { background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.1); padding:20px; }
+    .order-card-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+    .order-id { font-weight:700; color:#2d6a2d; }
+    .order-date { color:#888; font-size:.9rem; }
+    .status-badge { padding:4px 12px; border-radius:20px; font-size:.85rem; font-weight:600; text-transform:capitalize; }
+    .status-paid      { background:#d4edda; color:#155724; }
+    .status-shipped   { background:#cce5ff; color:#004085; }
+    .status-delivered { background:#d1ecf1; color:#0c5460; }
+    .status-pending   { background:#fff3cd; color:#856404; }
+    .status-cancelled { background:#f8d7da; color:#721c24; }
+    .order-amount { font-size:1.2rem; font-weight:bold; }
+    .order-items { margin-top:12px; border-top:1px solid #eee; padding-top:12px; }
+    .order-items table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    .order-items th { background:#f0f7f0; padding:8px; text-align:left; }
+    .order-items td { padding:8px; border-bottom:1px solid #f5f5f5; }
+    .empty-msg { text-align:center; padding:60px 20px; color:#888; }
+    .toggle-btn { background:none; border:none; color:#2d6a2d; cursor:pointer; font-size:.9rem; text-decoration:underline; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="nav-brand">🌾 Smart Agri-Connect</span>
+    <a href="home.html">Home</a>
+    <a href="marketplace.html">Marketplace</a>
+    <a href="cart.html">Cart</a>
+    <a href="wishlist.html">Wishlist</a>
+    <a href="#" onclick="logoutUser()">Logout</a>
+  </nav>
+
+  <div class="page-header">
+    <h2>Order History</h2>
+    <p>Track all your purchases</p>
+  </div>
+
+  <div id="orders-container" class="orders-list"></div>
+
+  <script src="script.js"></script>
+  <script>
+    const token = localStorage.getItem("token");
+
+    function statusClass(s) {
+      const map = { paid:'paid', shipped:'shipped', delivered:'delivered', pending:'pending', cancelled:'cancelled' };
+      return 'status-' + (map[s] || 'pending');
+    }
+
+    function formatDate(d) {
+      return new Date(d).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' });
+    }
+
+    async function loadOrders() {
+      const container = document.getElementById("orders-container");
+      try {
+        const res = await fetch("/api/users/orders", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.status || !data.data.length) {
+          container.innerHTML = '<p class="empty-msg">No orders yet. <a href="marketplace.html">Start shopping!</a></p>';
+          return;
+        }
+        container.innerHTML = data.data.map(order => `
+          <div class="order-card">
+            <div class="order-card-header">
+              <div>
+                <span class="order-id">Order #${order.id}</span>
+                <div class="order-date">${formatDate(order.createdAt)}</div>
+                <div style="font-size:.85rem;color:#666">TXN: ${order.transactionId}</div>
+              </div>
+              <div style="text-align:right">
+                <span class="status-badge ${statusClass(order.status)}">${order.status}</span>
+                <div class="order-amount" style="margin-top:6px">₹${Number(order.totalAmount).toFixed(2)}</div>
+                <div style="font-size:.85rem;color:#666">${order.paymentMethod?.toUpperCase()}</div>
+              </div>
+            </div>
+            <button class="toggle-btn" onclick="toggleItems(${order.id})">▶ View Items (${order.items.length})</button>
+            <div id="items-${order.id}" class="order-items" style="display:none">
+              <table>
+                <thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th></tr></thead>
+                <tbody>
+                  ${order.items.map(i => `
+                    <tr>
+                      <td>${i.product}</td>
+                      <td>${i.Quantity}</td>
+                      <td>₹${i.cost}</td>
+                      <td>₹${i.total}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = '<p class="empty-msg">Failed to load orders.</p>';
+      }
+    }
+
+    function toggleItems(id) {
+      const el = document.getElementById(`items-${id}`);
+      const btn = el.previousElementSibling;
+      if (el.style.display === 'none') {
+        el.style.display = 'block';
+        btn.textContent = btn.textContent.replace('▶', '▼');
+      } else {
+        el.style.display = 'none';
+        btn.textContent = btn.textContent.replace('▼', '▶');
+      }
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>

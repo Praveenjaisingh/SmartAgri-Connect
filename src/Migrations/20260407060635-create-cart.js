@@ -1,6 +1,6 @@
 'use strict';
 
-const { sequelize } = require('../models');
+const { sequelize } = require('../Models');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       userId: {
-        type: DataTypes.INTEGER,
+        type: Sequelize.INTEGER,
         allowNull: false
       },
       product: {

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wishlist - Smart Agri-Connect</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-header { text-align:center; padding:30px 0 10px; }
+    .wishlist-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:20px; padding:20px; max-width:1100px; margin:0 auto; }
+    .wish-card { background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.1); padding:20px; display:flex; flex-direction:column; gap:10px; }
+    .wish-card h3 { margin:0; color:#2d6a2d; }
+    .wish-card .cost { font-size:1.1rem; font-weight:bold; color:#444; }
+    .wish-card .btn-remove { background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; }
+    .wish-card .btn-remove:hover { background:#c0392b; }
+    .empty-msg { text-align:center; padding:60px 20px; color:#888; font-size:1.1rem; }
+    nav a { margin:0 10px; color:#2d6a2d; text-decoration:none; font-weight:600; }
+    nav { background:#f0f7f0; padding:12px 24px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .nav-brand { font-weight:700; color:#2d6a2d; flex:1; font-size:1.1rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="nav-brand">🌾 Smart Agri-Connect</span>
+    <a href="home.html">Home</a>
+    <a href="marketplace.html">Marketplace</a>
+    <a href="cart.html">Cart</a>
+    <a href="orders.html">Orders</a>
+    <a href="#" onclick="logoutUser()">Logout</a>
+  </nav>
+
+  <div class="page-header">
+    <h2>My Wishlist</h2>
+    <p>Products you've saved for later</p>
+  </div>
+
+  <div id="wishlist-container" class="wishlist-grid"></div>
+
+  <script src="script.js"></script>
+  <script>
+    const token = localStorage.getItem("token");
+
+    async function loadWishlist() {
+      const container = document.getElementById("wishlist-container");
+      try {
+        const res = await fetch("/api/users/wishlist", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.status || !data.data.length) {
+          container.innerHTML = '<p class="empty-msg">Your wishlist is empty. Browse the <a href="marketplace.html">Marketplace</a> to add items!</p>';
+          return;
+        }
+        container.innerHTML = data.data.map(item => `
+          <div class="wish-card" id="wish-${item.id}">
+            <h3>${item.product}</h3>
+            <span class="cost">₹${item.cost || 'N/A'}</span>
+            <button class="btn-remove" onclick="removeItem(${item.id})">Remove</button>
+          </div>
+        `).join("");
+      } catch (e) {
+        container.innerHTML = '<p class="empty-msg">Failed to load wishlist.</p>';
+      }
+    }
+
+    async function removeItem(id) {
+      try {
+        const res = await fetch(`/api/users/wishlist/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.status) {
+          document.getElementById(`wish-${id}`)?.remove();
+          const remaining = document.querySelectorAll('.wish-card').length;
+          if (!remaining) loadWishlist();
+        }
+      } catch (e) {
+        alert("Failed to remove item.");
+      }
+    }
+
+    loadWishlist();
+  </script>
+</body>
+</html>
