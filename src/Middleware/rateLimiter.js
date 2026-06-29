@@ -3,6 +3,8 @@
  * For production use express-rate-limit with a Redis store.
  */
 const rateStore = new Map();
+console.log("IP:", req.ip);
+console.log("Count:", timestamps.length);
 
 function rateLimiter({ windowMs = 15 * 60 * 1000, max = 100, message = 'Too many requests, please try again later.' } = {}) {
   return (req, res, next) => {
@@ -14,7 +16,6 @@ function rateLimiter({ windowMs = 15 * 60 * 1000, max = 100, message = 'Too many
       rateStore.set(key, []);
     }
 
-    // Remove old entries outside the window
     const timestamps = rateStore.get(key).filter(ts => ts > windowStart);
     timestamps.push(now);
     rateStore.set(key, timestamps);
@@ -33,7 +34,6 @@ function rateLimiter({ windowMs = 15 * 60 * 1000, max = 100, message = 'Too many
   };
 }
 
-// Clean up old entries every 5 minutes
 setInterval(() => {
   const cutoff = Date.now() - 15 * 60 * 1000;
   for (const [key, timestamps] of rateStore.entries()) {
