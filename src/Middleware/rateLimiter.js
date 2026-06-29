@@ -3,8 +3,6 @@
  * For production use express-rate-limit with a Redis store.
  */
 const rateStore = new Map();
-console.log("IP:", req.ip);
-console.log("Count:", timestamps.length);
 
 function rateLimiter({ windowMs = 15 * 60 * 1000, max = 100, message = 'Too many requests, please try again later.' } = {}) {
   return (req, res, next) => {
@@ -22,6 +20,7 @@ function rateLimiter({ windowMs = 15 * 60 * 1000, max = 100, message = 'Too many
 
     res.setHeader('X-RateLimit-Limit', max);
     res.setHeader('X-RateLimit-Remaining', Math.max(0, max - timestamps.length));
+    console.log({ip: req.ip,remote: req.connection.remoteAddress,key,count: timestamps.length,max});
 
     if (timestamps.length > max) {
       return res.status(429).json({
