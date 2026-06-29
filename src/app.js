@@ -4,13 +4,13 @@ const path = require("path");
 
 const userRoutes = require('./Routes/userRoutes');
 const errorHandler = require("./Middleware/errorHandler");
-const cspMiddleware = require("./Middleware/csp");
+// const cspMiddleware = require("./Middleware/csp");
 const rateLimiter = require("./Middleware/rateLimiter");
 
 const app = express();
 
 // ─── Security: CSP + security headers (apply before anything else) ────────────
-app.use(cspMiddleware);
+// app.use(cspMiddleware);
 
 // ─── Global rate limiter (100 req / 15 min per IP) ───────────────────────────
 app.use(rateLimiter({ windowMs: 15 * 60 * 1000, max: 100 }));
