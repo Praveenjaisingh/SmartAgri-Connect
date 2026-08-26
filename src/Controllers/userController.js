@@ -1,6 +1,5 @@
 const userService = require("../Services/userService");
 
-// ─── Auth ────────────────────────────────────────────────────────────────────
 
 exports.userCreate = async (req, res, next) => {
     try {
@@ -24,8 +23,6 @@ exports.logOut = async (req, res, next) => {
     } catch (error) { next(error); }
 };
 
-// ─── Contact ─────────────────────────────────────────────────────────────────
-
 exports.contact = async (req, res, next) => {
     try {
         const body = req.body;
@@ -34,8 +31,6 @@ exports.contact = async (req, res, next) => {
         return res.status(201).json({ status: true, message: "Contact submitted successfully", data });
     } catch (error) { next(error); }
 };
-
-// ─── Password ────────────────────────────────────────────────────────────────
 
 exports.forgetPassword = async (req, res, next) => {
     try {
@@ -50,8 +45,6 @@ exports.resetPassword = async (req, res, next) => {
         return res.status(200).json({ status: true, message: "Password reset successful" });
     } catch (error) { next(error); }
 };
-
-// ─── Products / Cart ─────────────────────────────────────────────────────────
 
 exports.payment = async (req, res, next) => {
     try {
@@ -98,8 +91,6 @@ exports.createUPIPayment = async (req, res, next) => {
     } catch (error) { next(error); }
 };
 
-// ─── Wishlist ─────────────────────────────────────────────────────────────────
-
 exports.addToWishlist = async (req, res, next) => {
     try {
         const userId = req.user.id;
@@ -124,8 +115,6 @@ exports.removeFromWishlist = async (req, res, next) => {
         return res.status(200).json({ status: true, message: "Removed from wishlist" });
     } catch (error) { next(error); }
 };
-
-// ─── Orders ──────────────────────────────────────────────────────────────────
 
 exports.placeOrder = async (req, res, next) => {
     try {
@@ -152,8 +141,6 @@ exports.getOrderDetail = async (req, res, next) => {
         return res.status(200).json({ status: true, message: "Order detail fetched", data });
     } catch (error) { next(error); }
 };
-
-// ─── Profile ─────────────────────────────────────────────────────────────────
 
 exports.getProfile = async (req, res, next) => {
     try {

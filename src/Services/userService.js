@@ -97,7 +97,7 @@ class userService {
         if (!userList) throw new AppError("No Data found");
         return userList;
     }
-
+    // ─── Orders ──────────────────────────────────────────────────────────────
     async cart(data) {
         const { product, cost, Quantity, total, userId } = data;
         const userList = await userRepository.cart({ userId, product, cost, Quantity, total });
@@ -131,8 +131,6 @@ class userService {
         return { customerName: user.name, amount: totalAmount, upiUrl };
     }
 
-    // ─── Wishlist ────────────────────────────────────────────────────────────
-
     async addToWishlist(userId, productData) {
         const { product, cost, image_path } = productData;
         if (!product) throw new AppError("Product name is required");
@@ -149,18 +147,13 @@ class userService {
         return deleted;
     }
 
-    // ─── Orders ──────────────────────────────────────────────────────────────
-
     async placeOrder(userId, paymentMethod) {
         const user = await userRepository.findUserById(userId);
         if (!user) throw new AppError("User not found");
-
         const cartItems = await userRepository.getUserCart(userId);
         if (!cartItems.length) throw new AppError("Cart is empty");
-
         const totalAmount = cartItems.reduce((sum, item) => sum + Number(item.total), 0);
         const transactionId = `TXN-${Date.now()}-${userId}`;
-
         const order = await userRepository.createOrder({
             userId,
             items: JSON.stringify(cartItems.map(i => ({ product: i.product, cost: i.cost, Quantity: i.Quantity, total: i.total }))),
@@ -169,10 +162,7 @@ class userService {
             status: 'paid',
             transactionId
         });
-
-        // Clear the cart after placing order
         await userRepository.clearCart(userId);
-
         return { order, transactionId, totalAmount };
     }
 
@@ -198,8 +188,6 @@ class userService {
         };
     }
 
-    // ─── Profile ─────────────────────────────────────────────────────────────
-
     async getProfile(userId) {
         const user = await userRepository.findUserById(userId);
         if (!user) throw new AppError("User not found");
@@ -209,16 +197,13 @@ class userService {
     async updateProfile(userId, data) {
         const user = await userRepository.findUserById(userId);
         if (!user) throw new AppError("User not found");
-
         if (data.name) user.name = data.name;
-
         if (data.currentPassword && data.newPassword) {
             const match = await bcrypt.compare(data.currentPassword, user.password);
             if (!match) throw new AppError("Current password is incorrect");
             user.password = await bcrypt.hash(data.newPassword, 10);
             user.confirmPassword = user.password;
         }
-
         await user.save();
         return { id: user.id, name: user.name, email: user.email };
     }

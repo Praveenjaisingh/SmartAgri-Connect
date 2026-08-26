@@ -80,10 +80,7 @@ class userRepository {
         return await Cart.destroy({ where: { userId } });
     }
 
-    // ─── Wishlist ────────────────────────────────────────────────────────────
-
     async addToWishlist(data) {
-        // Prevent duplicates
         const existing = await Wishlist.findOne({ where: { userId: data.userId, product: data.product } });
         if (existing) return existing;
         return await Wishlist.create(data);
@@ -100,8 +97,6 @@ class userRepository {
     async isInWishlist(userId, product) {
         return await Wishlist.findOne({ where: { userId, product } });
     }
-
-    // ─── Orders ──────────────────────────────────────────────────────────────
 
     async createOrder(data) {
         return await Order.create(data);
